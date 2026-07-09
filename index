@@ -1,1 +1,57 @@
-
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ægtefælle Tjekliste V4.3</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body{font-family:-apple-system,Segoe UI,sans-serif;margin:0;background:#f4f7fb}
+body.dark{background:#111827;color:#fff}
+header{background:linear-gradient(135deg,#2563eb,#60a5fa);color:#fff;padding:16px;text-align:center}
+.wrap{max-width:1200px;margin:auto;padding:12px}.card{background:#fff;padding:14px;border-radius:16px;margin:10px 0}body.dark .card{background:#1f2937}
+.tabs button,.tools button{padding:12px;border:0;border-radius:10px;margin:3px}.tab{display:none}.tab.active{display:block}
+.q{font-size:1.8rem;font-weight:700}.nums{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0}.nums button{width:58px;height:58px;border-radius:50%;border:0;font-weight:bold}
+.red{background:#ef4444;color:white}.yellow{background:#f59e0b}.green{background:#22c55e;color:white}.darkgreen{background:#166534;color:white}.sel{outline:4px solid #000}
+.note{width:100%;min-height:70px}.bar{height:24px;background:#ddd;border-radius:20px;overflow:hidden}.fill{height:100%}.grid{display:grid;grid-template-columns:1fr}.g2{display:grid;grid-template-columns:1fr}.gauge{font-size:42px;font-weight:bold;text-align:center}
+@media(min-width:900px){.grid{grid-template-columns:1fr 1fr;gap:10px}.g2{grid-template-columns:1fr 1fr}}
+</style></head><body>
+<header><h1>💍 Ægtefælle Tjekliste V4.3</h1></header>
+<div class='wrap'>
+<div class='card'>Kandidatnavn<br><input id='candidate' style='width:100%;padding:10px'></div>
+<div class='tools'><button onclick='toggleDark()'>🌙 Mørk</button><button onclick='saveData()'>💾 Gem</button><button onclick='loadData()'>📂 Indlæs</button><button onclick='window.print()'>📄 PDF</button></div>
+<div class='tabs'><button onclick="showTab('a')">🙏 Åndelige</button><button onclick="showTab('b')">👤 Karakter</button><button onclick="showTab('c')">🤝 Venskab</button><button onclick="showTab('d')">💍 Ægteskab</button></div>
+<div id='a' class='tab active'></div><div id='b' class='tab'></div><div id='c' class='tab'></div><div id='d' class='tab'></div>
+<div class='card'><div class='gauge'><span id='pct'>0</span>%</div><div class='bar'><div id='totalbar' class='fill green' style='width:0%'></div></div><h2 id='tot'>0/200</h2></div>
+<div class='card'><div id='catbars'></div></div>
+<div class='grid'><div class='card'><canvas id='pie'></canvas></div><div class='card'><canvas id='radar'></canvas></div></div>
+<div class='g2'>
+<div class='card'><h3>🏆 Top 5 styrker</h3><div id='strengths'></div></div>
+<div class='card'><h3>⚠️ Top 5 udviklingsområder</h3><div id='weak'></div></div>
+</div>
+<div class='card'><h3>🤖 Samlet analyse</h3><div id='analysis'></div></div>
+</div>
+<script>
+const qs={a:['Stærkt forhold til Jehova','Døbt og loyal','Kristne egenskaber','Samme åndelige mål','Hjælper mig åndeligt'],b:['Respekt for familie','Ydmyg og lyttende','Håndterer uenigheder godt','Rimelig og fleksibel','Kærlig og hensynsfuld'],c:['Åben kommunikation','Nyder samvær','Kan blive bedste venner','Fælles interesser','Gensidig tillid'],d:['Syn på penge','Arbejder på problemer','Kærlighed og tilgivelse','Moden ægtefælle','Godt omdømme']};
+let scores={};
+function cc(v){if(v<=3)return 'red';if(v<=6)return 'yellow';if(v<=8)return 'green';return 'darkgreen';}
+for(const k in qs){const div=document.getElementById(k);qs[k].forEach((q,i)=>{let h=`<div class='card'><div class='q'>${q}</div><div class='nums'>`;for(let n=1;n<=10;n++){h+=`<button class='${cc(n)}' data-k='${k}' data-i='${i}' data-v='${n}'>${n}</button>`;}h+=`</div><textarea id='note_${k}_${i}' class='note' placeholder='Noter...'></textarea></div>`;div.insertAdjacentHTML('beforeend',h);});}
+function attach(){document.querySelectorAll('.nums button').forEach(b=>b.onclick=function(){let k=this.dataset.k,i=this.dataset.i,v=+this.dataset.v;scores[k+'_'+i]=v;this.parentNode.querySelectorAll('button').forEach(x=>x.classList.remove('sel'));this.classList.add('sel');update();});document.querySelectorAll('.note').forEach(n=>n.oninput=update);}attach();
+function sum(k){let t=0;for(let i=0;i<5;i++)t+=(scores[k+'_'+i]||0);return t}
+let pie,radar;
+function update(){const arr=[sum('a'),sum('b'),sum('c'),sum('d')];const names=['Åndelige','Karakter','Venskab','Ægteskab'];const total=arr.reduce((a,b)=>a+b,0),pct=Math.round(total/200*100);document.getElementById('pct').textContent=pct;document.getElementById('tot').textContent=total+'/200';document.getElementById('totalbar').style.width=pct+'%';
+let bars='';arr.forEach((v,i)=>{let p=Math.round(v/50*100);bars+=`${names[i]} ${v}/50<div class='bar'><div class='fill ${cc(Math.round(v/5))}' style='width:${p}%'></div></div><br>`});document.getElementById('catbars').innerHTML=bars;
+let all=[];for(const k in qs){qs[k].forEach((q,i)=>all.push({q:q,v:scores[k+'_'+i]||0,n:document.getElementById('note_'+k+'_'+i).value}))}
+let st=all.filter(x=>x.v>=9).sort((a,b)=>b.v-a.v).slice(0,5);let wk=all.filter(x=>x.v>0&&x.v<=5).sort((a,b)=>a.v-b.v).slice(0,5);
+document.getElementById('strengths').innerHTML=st.map(x=>'✅ '+x.q+' ('+x.v+'/10)').join('<br>')||'Ingen endnu';
+document.getElementById('weak').innerHTML=wk.map(x=>'⚠️ '+x.q+' ('+x.v+'/10)'+(x.n?' – '+x.n:'' )).join('<br>')||'Ingen endnu';
+let txt='';if(pct>=90)txt='💚 Meget stærkt grundlag.';else if(pct>=80)txt='🟢 Lovende match.';else if(pct>=70)txt='🟡 Flere områder bør drøftes.';else txt='🔴 Brug mere tid på at lære hinanden at kende.';
+document.getElementById('analysis').innerHTML=txt+'<br><br>Fokusér især på spørgsmål med 5 point eller derunder.';
+if(window.Chart){if(pie)pie.destroy();if(radar)radar.destroy();pie=new Chart(document.getElementById('pie'),{type:'pie',data:{labels:names,datasets:[{data:arr}]}});radar=new Chart(document.getElementById('radar'),{type:'radar',data:{labels:names,datasets:[{label:'Score',data:arr}]},options:{scales:{r:{min:0,max:50}}}});}
+}
+function saveData(){const notes={};document.querySelectorAll('.note').forEach(n=>notes[n.id]=n.value);localStorage.setItem('mate43',JSON.stringify({candidate:document.getElementById('candidate').value,scores,notes}));alert('Gemt');}
+function loadData(){let d=JSON.parse(localStorage.getItem('mate43')||'{}');if(!d)return;document.getElementById('candidate').value=d.candidate||'';scores=d.scores||{};if(d.notes){for(const k in d.notes){let e=document.getElementById(k);if(e)e.value=d.notes[k];}}document.querySelectorAll('.nums button').forEach(b=>{let key=b.dataset.k+'_'+b.dataset.i;if(scores[key] && +b.dataset.v===scores[key]) b.classList.add('sel');});update();}
+function toggleDark(){document.body.classList.toggle('dark');}
+function showTab(id){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById(id).classList.add('active');}
+update();
+</script></body></html>
