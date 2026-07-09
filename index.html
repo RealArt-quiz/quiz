@@ -17,11 +17,11 @@ header{background:linear-gradient(135deg,#2563eb,#60a5fa);color:#fff;padding:16p
 @media(min-width:900px){.grid{grid-template-columns:1fr 1fr;gap:10px}.g2{grid-template-columns:1fr 1fr}}
 </style></head><body>
 <header><h1>💍 Ægtefælle Tjekliste
- </h1></header>
+  </h1><h3>Udfyld om din kæreste</h3></header>
 <div class='wrap'>
 <div class='card'>Kandidatnavn<br><input id='candidate' style='width:100%;padding:10px'></div>
 <div class='tools'><button onclick='toggleDark()'>🌙 Mørk</button><button onclick='saveData()'>💾 Gem</button><button onclick='loadData()'>📂 Indlæs</button><button onclick='window.print()'>📄 PDF</button></div>
-<div class='tabs'><button onclick="showTab('a')">🙏 Åndelige</button><button onclick="showTab('b')">👤 Karakter</button><button onclick="showTab('c')">🤝 Venskab</button><button onclick="showTab('d')">💍 Ægteskab</button></div>
+<div class='tabs'><button onclick="showTab('a')">🙏 Åndelige</button><button onclick="showTab('b')">👤 Personlighed</button><button onclick="showTab('c')">🤝 Venskab</button><button onclick="showTab('d')">💍 Ægteskab</button></div>
 <div id='a' class='tab active'></div><div id='b' class='tab'></div><div id='c' class='tab'></div><div id='d' class='tab'></div>
 <div class='card'><div class='gauge'><span id='pct'>0</span>%</div><div class='bar'><div id='totalbar' class='fill green' style='width:0%'></div></div><h2 id='tot'>0/200</h2></div>
 <div class='card'><div id='catbars'></div></div>
